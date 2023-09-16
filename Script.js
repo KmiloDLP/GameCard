@@ -262,7 +262,7 @@ class Mago extends NPC {
 
 
     calcularAtaque() {
-        const ataque_calculado = (this.Atk * 0.6 + this.Max_MP * 2.7)
+        const ataque_calculado = (this.Atk * 0.3 + this.Max_MP * 1.7)
         return super.calcularAtaque(ataque_calculado)
     }
 
