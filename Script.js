@@ -391,6 +391,7 @@ var turno = -1;
 var accion = "Mostrar";
 var mensaje = "";
 var mensaje2 = "";
+var bot = false;
 
 
 
@@ -471,6 +472,10 @@ const assets = [
         x: 650, y: 300, w: 200, h: 70, nombre: "BotonStart", imagenURL: "./Img/Botones/BotonStart.png",
         evento: function () { console.log(this.nombre); SelecionAvatar(); this.clicked = true; }
     }),
+    new Asset({//12 BotonBot
+        x: 650, y: 400, w: 200, h: 70, nombre: "BotonBot", imagenURL: "./Img/Botones/BotonBot.png",
+        evento: function () { console.log(this.nombre); SelecionAvatar(); this.clicked = true; bot = true; }
+    }),
 
 
 ]
@@ -501,6 +506,7 @@ function actualizar() {
 
 }
 function MenuObtion() {
+
     accion = "Mostrar";
     assets[9].clicked = true;
 
@@ -520,6 +526,7 @@ function MenuObtion() {
             if (turno > 5) { turno = 0; }
         }
 
+
         if (equipoPelea[turno].estado[0] > 0) {
 
             actualizar();
@@ -531,15 +538,27 @@ function MenuObtion() {
 
         }
         else {
-            mensaje2 = " ";
 
-            actualizar()
-            DibujarMensaje("Turno de " + equipoPelea[turno].nombre, 600, 500)
-            DibujarBotones(7)
-            DibujarBotones(8)
+            if (bot == false || bot == true && turno < 3) {
+
+                mensaje2 = " ";
+
+                actualizar()
+                DibujarMensaje("Turno de " + equipoPelea[turno].nombre, 600, 500)
+                DibujarBotones(7)
+                DibujarBotones(8)
+
+
+            } else if (bot == true && turno >= 3) {Bot();}
+
+
+
+
         }
 
-    } else {
+
+    }
+    else {
         console.log("fin del juego")
 
         if (Team1 == 1) { console.log("Team 1 gana"); GameOver(1) }
@@ -677,6 +696,24 @@ function Pocicionamiento() {
 function Verificacion(Team) {
     return Team.every((miembro) => miembro.HP === 0) ? 0 : 1;
 }
+function Bot() {
+
+    const accionBot = Math.round(Math.random());
+    const objetivo = Math.floor(Math.random() * 3);
+
+    console.log("Que hara el bot: " + accionBot)
+    console.log("Objetivo: " + objetivo)
+
+    switch (accionBot) {
+        case 0: accion = "Atacar"; break;
+        case 1: accion = "Habilidad"; break;
+    }
+
+    const target = assets.findIndex((target) => target.nombre === equipoPelea[objetivo].nombre);
+    assets[target].evento();
+
+
+}
 
 
 //inicio y final del juego
@@ -732,6 +769,7 @@ function GameStart() {
     assets.forEach(avatar => avatar.reset())
 
     DibujarBotones(11);
+    DibujarBotones(12);
 
 
 
