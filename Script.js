@@ -196,14 +196,20 @@ class Brujo extends NPC {
         if (this.MP < 100) {
             console.error("No tienes suficiente Mana")
         } else {
-            this.MP -= 100;
-            let robo = this.calcularAtaque() - target.Def * 0.9;
-            target.recibirAtaque(robo);
-            this.recibirCuracion(robo);
+            if (target.HP <= 0) {
+                mensaje = target.nombre + " ya esta muerto"
 
-            console.info(this.nombre + " le a robado" + robo + " puntos de HP a " + target.nombre)
-            mensaje = this.nombre + " le a robado" + robo + " puntos de HP a " + target.nombre
+            } else {
 
+                this.MP -= 100;
+                let robo = this.calcularAtaque() - target.Def * 0.9;
+                target.HP -= robo;
+                this.recibirCuracion(robo);
+
+                console.info(this.nombre + " le a robado" + robo + " puntos de HP a " + target.nombre)
+                mensaje = this.nombre + " le a robado" + robo + " puntos de HP a " + target.nombre
+                if (target.HP <= 0) { target.morir() }
+            }
 
 
         }
@@ -461,7 +467,7 @@ const assets = [
         evento: function () {
             console.log(this.nombre);
             MenuObtion();
-            //this.clicked = true;
+            this.clicked = true;
         }
     }),
     new Asset({//10 BotonFinal
@@ -475,6 +481,14 @@ const assets = [
     new Asset({//12 BotonBot
         x: 650, y: 400, w: 200, h: 70, nombre: "BotonBot", imagenURL: "./Img/Botones/BotonBot.png",
         evento: function () { console.log(this.nombre); SelecionAvatar(); this.clicked = true; bot = true; }
+    }),
+    new Asset({//9 BotonContinuarBot
+        x: 620, y: 550, w: 200, h: 70, nombre: "BotonContinuar1", imagenURL: "./Img/Botones/BotonContinuar.png", clicked: true,
+        evento: function () {
+            console.log(this.nombre);
+            Bot()
+            this.clicked = true;
+        }
     }),
 
 
@@ -506,6 +520,8 @@ function actualizar() {
 
 }
 function MenuObtion() {
+    console.clear
+    actualizar()
 
     accion = "Mostrar";
     assets[9].clicked = true;
@@ -527,10 +543,10 @@ function MenuObtion() {
         }
 
 
-        if (equipoPelea[turno].estado[0] > 0) {
+        if (equipoPelea[turno].estado[0] > 0) {// esta congelado
 
             actualizar();
-            DibujarMensaje(equipoPelea[turno].nombre + " esta " + equipoPelea[turno].estado[1], 600, 500);
+            DibujarMensaje(equipoPelea[turno].nombre + " esta  Congelado", 600, 500);
             DibujarBotones(9)
             equipoPelea[turno].estado[0] -= 1;
 
@@ -539,17 +555,22 @@ function MenuObtion() {
         }
         else {
 
-            if (bot == false || bot == true && turno < 3) {
+            if (bot == false || bot == true && turno < 3) {// turno normal
 
                 mensaje2 = " ";
 
-                actualizar()
+
                 DibujarMensaje("Turno de " + equipoPelea[turno].nombre, 600, 500)
                 DibujarBotones(7)
                 DibujarBotones(8)
 
 
-            } else if (bot == true && turno >= 3) {Bot();}
+            } else if (bot == true && turno >= 3) {// turno del bot
+                console.log("Turno del bot")
+                DibujarMensaje("Turno de " + equipoPelea[turno].nombre + " [BOT]", 600, 500)
+                DibujarBotones(13)
+
+            }
 
 
 
@@ -704,9 +725,25 @@ function Bot() {
     console.log("Que hara el bot: " + accionBot)
     console.log("Objetivo: " + objetivo)
 
+
+
     switch (accionBot) {
         case 0: accion = "Atacar"; break;
         case 1: accion = "Habilidad"; break;
+    }
+
+    if (equipoPelea[turno].nombre == "Gerrillero") {
+
+        let x = 0;
+        const ID = equipoPelea.findIndex((stage) => stage.nombre === equipoPelea[turno].nombre);
+
+        if (ID < 3) { x = 3 }
+        equipoPelea[turno].habilidadEspecial(equipoPelea[x], equipoPelea[x + 1], equipoPelea[x + 2])
+
+        actualizar()
+        DibujarMensaje(mensaje, 500, 530)
+        DibujarBotones(9)
+
     }
 
     const target = assets.findIndex((target) => target.nombre === equipoPelea[objetivo].nombre);
@@ -814,10 +851,7 @@ canvas.addEventListener('click', function (event) {
     for (const asset of assets) {
         if (!asset.clicked && x >= asset.x && x <= asset.x + asset.w && y >= asset.y && y <= asset.y + asset.h) {
 
-
             asset.evento();
-
-
 
         }
     }
